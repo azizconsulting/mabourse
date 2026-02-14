@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565C0">
+    <title>Mon Portfolio - Wafabourse</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links a {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: white;
+            color: #1565C0;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .summary-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .summary-card.positive .value {
+            color: #2E7D32;
+        }
+        
+        .summary-card.negative .value {
+            color: #C62828;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        .table-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .ticker {
+            font-weight: 600;
+            color: #1565C0;
+        }
+        
+        .positive {
+            color: #2E7D32;
+        }
+        
+        .negative {
+            color: #C62828;
+        }
+        
+        .total-row {
+            background: #E3F2FD !important;
+            font-weight: bold;
+        }
+        
+        .best-worst {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .best-worst-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .best-worst-card h3 {
+            font-size: 1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .best-worst-card.best h3 {
+            color: #2E7D32;
+        }
+        
+        .best-worst-card.worst h3 {
+            color: #C62828;
+        }
+        
+        .best-worst-card .ticker-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .best-worst-card .gain-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .error {
+            background: #FFEBEE;
+            color: #C62828;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💼 Mon Portfolio</h1>
+            <p>Suivi de mes investissements Wafabourse</p>
+            <div class="nav-links">
+                <a href="index.html">📈 Cours</a>
+                <a href="portfolio.html">💼 Portfolio</a>
+            </div>
+        </header>
+        
+        <div id="content">
+            <div class="loading">Chargement du portfolio...</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            SHEET_ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',
+            SHEET_NAME: 'BD',
+        };
+
+        async function loadPortfolio() {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Chargement du portfolio...</div>';
+            
+            try {
+                const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_NAME}`;
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                const jsonData = JSON.parse(text.substring(47, text.length - 2));
+                
+                processPortfolioData(jsonData);
+                    
+            } catch (error) {
+                console.error('Erreur:', error);
+                content.innerHTML = `
+                    <div class="error">
+                        ❌ Erreur de chargement<br>
+                        Vérifiez que la feuille "BD" existe et est publique.<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function processPortfolioData(data) {
+            const rows = data.table.rows;
+            const cols = data.table.cols;
+            
+            const headers = cols.map(col => col.label);
+            
+            const portfolio = rows.map(row => {
+                const obj = {};
+                row.c.forEach((cell, i) => {
+                    if (cell) {
+                        obj[headers[i]] = cell.v;
+                    }
+                });
+                return obj;
+            }).filter(row => row[headers[0]]);
+
+            displayPortfolio(portfolio, headers);
+        }
+
+        function displayPortfolio(data, headers) {
+            const content = document.getElementById('content');
+            
+            if (data.length === 0) {
+                content.innerHTML = '<div class="error">Aucune donnée trouvée dans la feuille "BD"</div>';
+                return;
+            }
+
+            // Calculer les totaux et statistiques
+            let totalNb = 0;
+            let totalInvesti = 0;
+            let totalValorisation = 0;
+            let bestGain = { ticker: '', gain: -Infinity, percent: 0 };
+            let worstGain = { ticker: '', gain: Infinity, percent: 0 };
+
+            data.forEach(row => {
+                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
+                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
+                const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
+                
+                const valorisation = nb * cours;
+                const gain = valorisation - investi;
+                const gainPercent = investi > 0 ? (gain / investi) * 100 : 0;
+
+                totalNb += nb;
+                totalInvesti += investi;
+                totalValorisation += valorisation;
+
+                if (gain > bestGain.gain) {
+                    bestGain = { ticker: row[headers[0]], gain, percent: gainPercent };
+                }
+                if (gain < worstGain.gain) {
+                    worstGain = { ticker: row[headers[0]], gain, percent: gainPercent };
+                }
+
+                row._calculated = { valorisation, gain, gainPercent };
+            });
+
+            const totalGain = totalValorisation - totalInvesti;
+            const totalGainPercent = totalInvesti > 0 ? (totalGain / totalInvesti) * 100 : 0;
+
+            // Créer le HTML
+            let html = `
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Total Titres</h3>
+                        <div class="value">${totalNb.toLocaleString('fr-FR')}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Montant Investi</h3>
+                        <div class="value">${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Valorisation</h3>
+                        <div class="value">${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD</div>
+                    </div>
+                    <div class="summary-card ${totalGain >= 0 ? 'positive' : 'negative'}">
+                        <h3>Gain/Perte Total</h3>
+                        <div class="value">
+                            ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD
+                            <br><small>(${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="best-worst">
+                    <div class="best-worst-card best">
+                        <h3>📈 Meilleure Performance</h3>
+                        <div class="ticker-name">${bestGain.ticker}</div>
+                        <div class="gain-value positive">
+                            +${bestGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD
+                            <br><small>(+${bestGain.percent.toFixed(2)}%)</small>
+                        </div>
+                    </div>
+                    <div class="best-worst-card worst">
+                        <h3>📉 Plus Grande Perte</h3>
+                        <div class="ticker-name">${worstGain.ticker}</div>
+                        <div class="gain-value negative">
+                            ${worstGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD
+                            <br><small>(${worstGain.percent.toFixed(2)}%)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-title">📋 Détail du Portfolio</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Nb</th>
+                                <th>Cours Actuel</th>
+                                <th>Mt Investi</th>
+                                <th>Valorisation</th>
+                                <th>Gains/Pertes</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(row => {
+                const calc = row._calculated;
+                const ticker = row[headers[0]];
+                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
+                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
+                const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
+                
+                html += `
+                    <tr>
+                        <td class="ticker">${ticker}</td>
+                        <td>${nb.toLocaleString('fr-FR')}</td>
+                        <td>${cours.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td>${investi.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td>${calc.valorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="${calc.gain >= 0 ? 'positive' : 'negative'}">
+                            ${calc.gain >= 0 ? '+' : ''}${calc.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </td>
+                        <td class="${calc.gainPercent >= 0 ? 'positive' : 'negative'}">
+                            ${calc.gainPercent >= 0 ? '+' : ''}${calc.gainPercent.toFixed(2)}%
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        <tr class="total-row">
+                            <td>TOTAL</td>
+                            <td>${totalNb.toLocaleString('fr-FR')}</td>
+                            <td>-</td>
+                            <td>${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td>${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="${totalGain >= 0 ? 'positive' : 'negative'}">
+                                ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </td>
+                            <td class="${totalGainPercent >= 0 ? 'positive' : 'negative'}">
+                                ${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        loadPortfolio();
+    </script>
+</body>
+</html>
