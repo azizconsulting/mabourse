@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2E7D32">
+    <title>Ma Bourse</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+            color: white;
+            padding: 35px 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 50px rgba(26, 35, 126, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        /* Onglets */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #1a237e;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(245, 124, 0, 0.4);
+            font-weight: 600;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 124, 0, 0.5);
+        }
+        
+        .last-update {
+            margin-top: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        /* Contenu des onglets */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Cards - Ultra Compact */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            .cards-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 12px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2E7D32, #4CAF50);
+            opacity: 0.7;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .card.selected {
+            border: 2px solid #1a237e;
+            box-shadow: 0 0 15px rgba(26, 35, 126, 0.3);
+        }
+        
+        .card.selected::before {
+            opacity: 1;
+            height: 4px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        
+        .card-title {
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .card-variation {
+            font-size: 0.75em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            margin-top: 2px;
+        }
+        
+        .card-variation.positive {
+            color: #2E7D32;
+            background: rgba(46, 125, 50, 0.1);
+        }
+        
+        .card-variation.negative {
+            color: #C62828;
+            background: rgba(198, 40, 40, 0.1);
+        }
+        
+        .card-variation .arrow {
+            font-size: 0.9em;
+        }
+        
+        .card-date {
+            display: none;
+        }
+        
+        /* Date header global */
+        .global-date {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #1a237e;
+            background: linear-gradient(135deg, #ffffff 0%, #e8eaf6 100%);
+            padding: 10px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.15);
+            border: 1px solid rgba(26, 35, 126, 0.1);
+        }
+        
+        /* Portfolio summary cards - Compact 4 per row */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 0.65em;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-card .value {
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.2;
+        }
+        
+        .summary-card.positive .value {
+            color: #2E7D32;
+        }
+        
+        .summary-card.negative .value {
+            color: #C62828;
+        }
+        
+        /* Charts */
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .ticker {
+            font-weight: 600;
+            color: #1565C0;
+        }
+        
+        .positive {
+            color: #2E7D32;
+        }
+        
+        .negative {
+            color: #C62828;
+        }
+        
+        .total-row {
+            background: #E3F2FD !important;
+            font-weight: bold;
+        }
+        
+        /* Best/Worst */
+        .best-worst {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .best-worst-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .best-worst-card h3 {
+            font-size: 1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .best-worst-card.best h3 {
+            color: #2E7D32;
+        }
+        
+        .best-worst-card.worst h3 {
+            color: #C62828;
+        }
+        
+        .best-worst-card .ticker-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .best-worst-card .gain-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        /* Loading & Error */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .error {
+            background: #FFEBEE;
+            color: #C62828;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+            
+            .card-value {
+                font-size: 1.5em;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+            
+            .tab-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 Ma Bourse</h1>
+            <p>Suivi des cours et du portfolio</p>
+            
+            <!-- Onglets -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('cours')">📊 Cours</button>
+                <button class="tab-btn" onclick="showTab('portfolio')">💼 Portfolio</button>
+            </div>
+            
+            <button class="refresh-btn" onclick="refreshAll()">🔄 Actualiser</button>
+            <div class="last-update" id="lastUpdate"></div>
+        </header>
+        
+        <!-- Onglet COURS -->
+        <div id="cours" class="tab-content active">
+            <div id="cours-content">
+                <div class="loading">Chargement des cours...</div>
+            </div>
+        </div>
+        
+        <!-- Onglet PORTFOLIO -->
+        <div id="portfolio" class="tab-content">
+            <div id="portfolio-content">
+                <div class="loading">Chargement du portfolio...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            SHEET_COURS: {
+                ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',
+                NAME: 'Cours_Quotidien'
+            },
+            SHEET_PORTFOLIO: {
+                ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',
+                NAME: 'BD'
+            }
+        };
+
+        let chart = null;
+        let currentData = null;
+        let currentHeaders = null;
+        let selectedTitre = null;
+
+        // === Utils ===
+        function formatDateJJMMAAAA(dateValue) {
+            if (!dateValue) return '';
+
+            // Date object
+            if (typeof dateValue === 'object' && dateValue instanceof Date) {
+                const jour = String(dateValue.getDate()).padStart(2, '0');
+                const mois = String(dateValue.getMonth() + 1).padStart(2, '0');
+                const annee = dateValue.getFullYear();
+                return `${jour}/${mois}/${annee}`;
+            }
+
+            // String: Date(YYYY,M,D)
+            if (typeof dateValue === 'string' && dateValue.includes('Date(')) {
+                const match = dateValue.match(/Date\((\d+),(\d+),(\d+)\)/);
+                if (match) {
+                    const annee = match[1];
+                    const mois = String(parseInt(match[2], 10) + 1).padStart(2, '0');
+                    const jour = String(match[3]).padStart(2, '0');
+                    return `${jour}/${mois}/${annee}`;
+                }
+            }
+
+            // String: YYYY-MM-DD
+            if (typeof dateValue === 'string' && dateValue.includes('-')) {
+                const parts = dateValue.split('-');
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+
+            return String(dateValue);
+        }
+
+        function normalizeHeader(label) {
+            return String(label || '')
+                .trim()
+                .replace(/\s+/g, '_')
+                .replace(/[^A-Za-z0-9_]/g, '_');
+        }
+
+        // Afficher un onglet
+        function showTab(tabName) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Afficher l'onglet sélectionné
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Rafraîchir tout
+        function refreshAll() {
+            loadCours();
+            loadPortfolio();
+            document.getElementById('lastUpdate').textContent = 
+                'Dernière mise à jour : ' + new Date().toLocaleString('fr-FR');
+        }
+
+        // ========== CHARGEMENT COURS ==========
+        async function loadCours() {
+            const content = document.getElementById('cours-content');
+            content.innerHTML = '<div class="loading">Chargement des cours...</div>';
+            
+            try {
+                const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_COURS.ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_COURS.NAME}`;
+                const response = await fetch(url);
+                const text = await response.text();
+                const jsonData = JSON.parse(text.substring(47, text.length - 2));
+                
+                processCoursData(jsonData);
+                    
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="error">
+                        ❌ Erreur de chargement des cours<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function processCoursData(data) {
+            const rows = data.table.rows;
+            const cols = data.table.cols;
+            const headers = cols.map(col => col.label);
+            
+            const dataPoints = rows.map((row, index) => {
+                const obj = { index };
+                row.c.forEach((cell, i) => {
+                    if (!cell) return;
+                    const label = headers[i];
+                    obj[label] = cell.v;
+                    // Ajouter une clé normalisée (ex: "MED PAPER" -> "MED_PAPER")
+                    const norm = normalizeHeader(label);
+                    if (norm && norm !== label) obj[norm] = cell.v;
+                });
+                return obj;
+            }).filter(row => row[headers[0]] || row[normalizeHeader(headers[0])]);
+
+            const recentData = dataPoints.slice(-30);
+            displayCours(recentData, headers);
+        }
+
+        function displayCours(data, headers) {
+            const content = document.getElementById('cours-content');
+            if (data.length === 0) {
+                content.innerHTML = '<div class="error">Aucune donnée trouvée</div>';
+                return;
+            }
+
+            const latest = data[data.length - 1];
+            const previous = data.length > 1 ? data[data.length - 2] : null;
+            const titres = ['AKDITAL', 'ALLIANCE', 'TGCC', 'MED_PAPER', 'IAM', 'ENNAKL', 'SGTM'];
+            
+            // Date header global - format JJ/MM/AAAA
+            let dateStr = latest['DATE'] || latest[headers[0]] || latest[normalizeHeader(headers[0])] || '';
+            dateStr = formatDateJJMMAAAA(dateStr);
+            
+            let html = `
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <span class="global-date">📅 ${dateStr}</span>
+                </div>
+                <div class="cards-grid">
+            `;
+            
+            // Sélectionner le premier titre par défaut
+            if (!selectedTitre || !titres.includes(selectedTitre)) {
+                selectedTitre = titres[0];
+            }
+            
+            titres.forEach(titre => {
+                if (latest[titre] !== undefined) {
+                    const value = typeof latest[titre] === 'number' 
+                        ? latest[titre].toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                        : latest[titre];
+                    
+                    // Calcul variation
+                    let variationHtml = '';
+                    if (previous && previous[titre] !== undefined && typeof latest[titre] === 'number') {
+                        const currentVal = parseFloat(latest[titre]);
+                        const prevVal = parseFloat(previous[titre]);
+                        if (prevVal !== 0) {
+                            const variation = ((currentVal - prevVal) / prevVal) * 100;
+                            const isPositive = variation >= 0;
+                            const arrow = isPositive ? '↑' : '↓';
+                            const sign = isPositive ? '+' : '';
+                            variationHtml = `
+                                <div class="card-variation ${isPositive ? 'positive' : 'negative'}">
+                                    <span class="arrow">${arrow}</span>
+                                    <span>${sign}${variation.toFixed(2)}%</span>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    const isSelected = titre === selectedTitre ? 'selected' : '';
+                    
+                    html += `
+                        <div class="card ${isSelected}" onclick="selectTitre('${titre}')">
+                            <div class="card-header">
+                                <span class="card-title">${titre}</span>
+                            </div>
+                            <div class="card-value">${value}</div>
+                            ${variationHtml}
+                        </div>
+                    `;
+                }
+            });
+            html += '</div>';
+
+            // Un seul graphique histogramme
+            html += `
+                <div class="chart-container">
+                    <div class="chart-title">📊 Évolution de ${selectedTitre} (30 derniers jours)</div>
+                    <div class="chart-wrapper">
+                        <canvas id="chartHistogramme"></canvas>
+                    </div>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            currentData = data;
+            currentHeaders = headers;
+            createHistogramme(data, selectedTitre);
+        }
+
+        function selectTitre(titre) {
+            selectedTitre = titre;
+            // Rafraîchir l'affichage
+            if (currentData && currentHeaders) {
+                displayCours(currentData, currentHeaders);
+            }
+        }
+
+        function createHistogramme(data, titre) {
+            const dates = data.map(d => formatDateJJMMAAAA(d['DATE'] || d[Object.keys(d)[0]]));
+            const values = data.map(d => d[titre]);
+            const colors = {
+                'AKDITAL': '#2E7D32',
+                'ALLIANCE': '#1565C0',
+                'TGCC': '#C62828',
+                'MED_PAPER': '#F57C00',
+                'IAM': '#6A1B9A',
+                'ENNAKL': '#00796B',
+                'SGTM': '#E64A19'
+            };
+            
+            // Calculer les variations pour colorer les barres
+            const backgroundColors = values.map((val, idx) => {
+                if (idx === 0) return colors[titre] || '#333';
+                const prev = values[idx - 1];
+                return val >= prev ? '#2E7D32' : '#C62828';
+            });
+
+            const ctx = document.getElementById('chartHistogramme');
+            if (ctx) {
+                // Détruire le graphique précédent s'il existe
+                if (chart) {
+                    chart.destroy();
+                }
+                
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: titre,
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            borderColor: colors[titre] || '#333',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('fr-FR');
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            }
+        }
+
+        // ========== CHARGEMENT PORTFOLIO ==========
+        async function loadPortfolio() {
+            const content = document.getElementById('portfolio-content');
+            content.innerHTML = '<div class="loading">Chargement du portfolio...</div>';
+            
+            try {
+                const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_PORTFOLIO.ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_PORTFOLIO.NAME}`;
+                const response = await fetch(url);
+                const text = await response.text();
+                const jsonData = JSON.parse(text.substring(47, text.length - 2));
+                
+                processPortfolioData(jsonData);
+                    
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="error">
+                        ❌ Erreur de chargement du portfolio<br>
+                        Vérifiez que la feuille "BD" existe et est publique.<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function processPortfolioData(data) {
+            const rows = data.table.rows;
+            const cols = data.table.cols;
+            const headers = cols.map(col => col.label);
+            
+            const portfolio = rows.map(row => {
+                const obj = {};
+                row.c.forEach((cell, i) => {
+                    if (cell) obj[headers[i]] = cell.v;
+                });
+                return obj;
+            }).filter(row => row[headers[0]]);
+
+            displayPortfolio(portfolio, headers);
+        }
+
+        function displayPortfolio(data, headers) {
+            const content = document.getElementById('portfolio-content');
+            
+            if (data.length === 0) {
+                content.innerHTML = '<div class="error">Aucune donnée trouvée dans la feuille "BD"</div>';
+                return;
+            }
+
+            let totalNb = 0, totalInvesti = 0, totalValorisation = 0;
+            let bestGain = { ticker: '', gain: -Infinity, percent: 0 };
+            let worstGain = { ticker: '', gain: Infinity, percent: 0 };
+
+            data.forEach(row => {
+                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
+                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
+                const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
+                
+                const valorisation = nb * cours;
+                const gain = valorisation - investi;
+                const gainPercent = investi > 0 ? (gain / investi) * 100 : 0;
+
+                totalNb += nb;
+                totalInvesti += investi;
+                totalValorisation += valorisation;
+
+                if (gain > bestGain.gain) bestGain = { ticker: row[headers[0]], gain, percent: gainPercent };
+                if (gain < worstGain.gain) worstGain = { ticker: row[headers[0]], gain, percent: gainPercent };
+
+                row._calculated = { valorisation, gain, gainPercent };
+            });
+
+            const totalGain = totalValorisation - totalInvesti;
+            const totalGainPercent = totalInvesti > 0 ? (totalGain / totalInvesti) * 100 : 0;
+
+            let html = `
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Total Titres</h3>
+                        <div class="value">${totalNb.toLocaleString('fr-FR')}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Montant Investi</h3>
+                        <div class="value">${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Valorisation</h3>
+                        <div class="value">${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</div>
+                    </div>
+                    <div class="summary-card ${totalGain >= 0 ? 'positive' : 'negative'}">
+                        <h3>Gain/Perte Total</h3>
+                        <div class="value">
+                            ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
+                            <br><small>(${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="best-worst">
+                    <div class="best-worst-card best">
+                        <h3>📈 Meilleure Performance</h3>
+                        <div class="ticker-name">${bestGain.ticker}</div>
+                        <div class="gain-value positive">
+                            +${bestGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
+                            <br><small>(+${bestGain.percent.toFixed(2)}%)</small>
+                        </div>
+                    </div>
+                    <div class="best-worst-card worst">
+                        <h3>📉 Plus Grande Perte</h3>
+                        <div class="ticker-name">${worstGain.ticker}</div>
+                        <div class="gain-value negative">
+                            ${worstGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
+                            <br><small>(${worstGain.percent.toFixed(2)}%)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="chart-title">📋 Détail du Portfolio</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Nb</th>
+                                <th>Cours</th>
+                                <th>Investi</th>
+                                <th>Valorisation</th>
+                                <th>Gains</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(row => {
+                const calc = row._calculated;
+                const ticker = row[headers[0]];
+                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
+                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
+                const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
+                
+                html += `
+                    <tr>
+                        <td class="ticker">${ticker}</td>
+                        <td>${nb.toLocaleString('fr-FR')}</td>
+                        <td>${cours.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                        <td>${investi.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                        <td>${calc.valorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                        <td class="${calc.gain >= 0 ? 'positive' : 'negative'}">
+                            ${calc.gain >= 0 ? '+' : ''}${calc.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
+                        </td>
+                        <td class="${calc.gainPercent >= 0 ? 'positive' : 'negative'}">
+                            ${calc.gainPercent >= 0 ? '+' : ''}${calc.gainPercent.toFixed(2)}%
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        <tr class="total-row">
+                            <td>TOTAL</td>
+                            <td>${totalNb.toLocaleString('fr-FR')}</td>
+                            <td>-</td>
+                            <td>${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                            <td>${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                            <td class="${totalGain >= 0 ? 'positive' : 'negative'}">
+                                ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
+                            </td>
+                            <td class="${totalGainPercent >= 0 ? 'positive' : 'negative'}">
+                                ${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        // Charger au démarrage
+        loadCours();
+        loadPortfolio();
+    </script>
+</body>
+</html>
