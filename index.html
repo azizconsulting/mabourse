@@ -1,1010 +1,1026 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2E7D32">
-    <title>Ma Bourse</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192x192.png">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
-            color: white;
-            padding: 35px 25px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 15px 50px rgba(26, 35, 126, 0.3);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        
-        header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .tab-btn {
-            background: rgba(255,255,255,0.15);
-            border: 2px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .tab-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .tab-btn.active {
-            background: white;
-            color: #1a237e;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .refresh-btn {
-            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-            border: none;
-            color: white;
-            padding: 12px 28px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            margin-top: 20px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(245, 124, 0, 0.4);
-            font-weight: 600;
-        }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 124, 0, 0.5);
-        }
-        
-        .last-update {
-            margin-top: 10px;
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        
-        @media (max-width: 480px) {
-            .cards-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        .card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border-radius: 12px;
-            padding: 12px 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            text-align: center;
-            border: 1px solid rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #2E7D32, #4CAF50);
-            opacity: 0.7;
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-        
-        .card.selected {
-            border: 2px solid #1a237e;
-            box-shadow: 0 0 15px rgba(26, 35, 126, 0.3);
-        }
-        
-        .card.selected::before {
-            opacity: 1;
-            height: 4px;
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-        
-        .card-title {
-            font-size: 0.75em;
-            font-weight: 700;
-            color: #555;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .card-value {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        
-        .card-variation {
-            font-size: 0.75em;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            padding: 2px 6px;
-            border-radius: 12px;
-            margin-top: 2px;
-        }
-        
-        .card-variation.positive {
-            color: #2E7D32;
-            background: rgba(46, 125, 50, 0.1);
-        }
-        
-        .card-variation.negative {
-            color: #C62828;
-            background: rgba(198, 40, 40, 0.1);
-        }
-        
-        .card-variation .arrow {
-            font-size: 0.9em;
-        }
-        
-        .card-date {
-            display: none;
-        }
-        
-        .global-date {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            font-weight: 700;
-            color: #1a237e;
-            background: linear-gradient(135deg, #ffffff 0%, #e8eaf6 100%);
-            padding: 10px 25px;
-            border-radius: 25px;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.15);
-            border: 1px solid rgba(26, 35, 126, 0.1);
-        }
-        
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .summary-cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        .summary-card {
-            background: white;
-            border-radius: 10px;
-            padding: 12px 8px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-        
-        .summary-card h3 {
-            font-size: 0.65em;
-            color: #666;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .summary-card .value {
-            font-size: 0.95em;
-            font-weight: bold;
-            color: #333;
-            line-height: 1.2;
-        }
-        
-        .summary-card.positive .value {
-            color: #2E7D32;
-        }
-        
-        .summary-card.negative .value {
-            color: #C62828;
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        }
-        
-        .chart-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .chart-wrapper {
-            position: relative;
-            height: 300px;
-        }
-        
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95em;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: right;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th:first-child, td:first-child {
-            text-align: left;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
-            position: sticky;
-            top: 0;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .ticker {
-            font-weight: 600;
-            color: #1565C0;
-        }
-        
-        .positive {
-            color: #2E7D32;
-        }
-        
-        .negative {
-            color: #C62828;
-        }
-        
-        .total-row {
-            background: #E3F2FD !important;
-            font-weight: bold;
-        }
-        
-        .best-worst {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .best-worst-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        }
-        
-        .best-worst-card h3 {
-            font-size: 1em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .best-worst-card.best h3 {
-            color: #2E7D32;
-        }
-        
-        .best-worst-card.worst h3 {
-            color: #C62828;
-        }
-        
-        .best-worst-card .ticker-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .best-worst-card .gain-value {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.2em;
-            color: #666;
-        }
-        
-        .error {
-            background: #FFEBEE;
-            color: #C62828;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.5em;
-            }
-            
-            .card-value {
-                font-size: 1.5em;
-            }
-            
-            .chart-wrapper {
-                height: 250px;
-            }
-            
-            th, td {
-                padding: 8px;
-                font-size: 0.85em;
-            }
-            
-            .tab-btn {
-                padding: 10px 20px;
-                font-size: 0.9em;
-            }
-        }
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📈 Ma Bourse</h1>
-            <p>Suivi des cours et du portfolio</p>
-            <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('cours')">📊 Cours</button>
-                <button class="tab-btn" onclick="showTab('portfolio')">💼 Portfolio</button>
-            </div>
-            <button class="refresh-btn" onclick="refreshAll()">🔄 Actualiser</button>
-            <div class="last-update" id="lastUpdate"></div>
-        </header>
-        
-        <!-- Onglet COURS -->
-        <div id="cours" class="tab-content active">
-            <div id="cours-content">
-                <div class="loading">Chargement des cours...</div>
-            </div>
-        </div>
-        
-        <!-- Onglet PORTFOLIO -->
-        <div id="portfolio" class="tab-content">
-            <div id="portfolio-content">
-                <div class="loading">Chargement du portfolio...</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const CONFIG = {
-            SHEET_COURS: {
-                ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',
-                NAME: 'Cours_Quotidien'
-            },
-            SHEET_PORTFOLIO: {
-                ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',
-                NAME: 'BD'
-            }
-        };
-
-        let chart = null;
-        let currentData = null;
-        let currentHeaders = null;
-        let selectedTitre = null;
-
-        function formatDateJJMMAAAA(dateValue) {
-            if (!dateValue) return '';
-            if (typeof dateValue === 'object' && dateValue instanceof Date) {
-                const jour = String(dateValue.getDate()).padStart(2, '0');
-                const mois = String(dateValue.getMonth() + 1).padStart(2, '0');
-                const annee = dateValue.getFullYear();
-                return `${jour}/${mois}/${annee}`;
-            }
-            if (typeof dateValue === 'string' && dateValue.includes('Date(')) {
-                const match = dateValue.match(/Date\((\d+),(\d+),(\d+)\)/);
-                if (match) {
-                    const annee = match[1];
-                    const mois = String(parseInt(match[2], 10) + 1).padStart(2, '0');
-                    const jour = String(match[3]).padStart(2, '0');
-                    return `${jour}/${mois}/${annee}`;
-                }
-            }
-            if (typeof dateValue === 'string' && dateValue.includes('-')) {
-                const parts = dateValue.split('-');
-                if (parts.length === 3) {
-                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                }
-            }
-            return String(dateValue);
-        }
-
-        function normalizeHeader(label) {
-            return String(label || '')
-                .trim()
-                .replace(/\s+/g, '_')
-                .replace(/[^A-Za-z0-9_]/g, '_');
-        }
-
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function refreshAll() {
-            loadCours();
-            loadPortfolio();
-            document.getElementById('lastUpdate').textContent = 
-                'Dernière mise à jour : ' + new Date().toLocaleString('fr-FR');
-        }
-
-        // ==== COURS ====
-        async function loadCours() {
-            const content = document.getElementById('cours-content');
-            content.innerHTML = '<div class="loading">Chargement des cours...</div>';
-            try {
-                const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_COURS.ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_COURS.NAME}`;
-                const response = await fetch(url);
-                const text = await response.text();
-                const jsonData = JSON.parse(text.substring(47, text.length - 2));
-                processCoursData(jsonData);
-            } catch (error) {
-                content.innerHTML = `
-                    <div class="error">
-                        ❌ Erreur de chargement des cours<br>
-                        <small>${error.message}</small>
-                    </div>
-                `;
-            }
-        }
-
-        function processCoursData(data) {
-            const rows = data.table.rows;
-            const cols = data.table.cols;
-            const headers = cols.map(col => col.label);
-            
-            const dataPoints = rows.map((row, index) => {
-                const obj = { index };
-                row.c.forEach((cell, i) => {
-                    if (!cell) return;
-                    const label = headers[i];
-                    obj[label] = cell.v;
-                    const norm = normalizeHeader(label);
-                    if (norm && norm !== label) obj[norm] = cell.v;
-                });
-                return obj;
-            }).filter(row => row[headers[0]] || row[normalizeHeader(headers[0])]);
-
-            displayCours(dataPoints, headers);
-        }
-
-        function displayCours(data, headers) {
-            const content = document.getElementById('cours-content');
-            if (data.length === 0) {
-                content.innerHTML = '<div class="error">Aucune donnée trouvée</div>';
-                return;
-            }
-
-            const latest = data[data.length - 1];
-            const previous = data.length > 1 ? data[data.length - 2] : null;
-            const titres = ['AKDITAL', 'ALLIANCE', 'TGCC', 'MED_PAPER', 'IAM', 'ENNAKL', 'SGTM'];
-            
-            let dateStr = latest['DATE'] || latest[headers[0]] || latest[normalizeHeader(headers[0])] || '';
-            dateStr = formatDateJJMMAAAA(dateStr);
-            
-            let html = `
-                <div style="text-align: center; margin-bottom: 12px;">
-                    <span class="global-date">📅 ${dateStr}</span>
-                </div>
-                <div class="cards-grid">
-            `;
-            
-            if (!selectedTitre || !titres.includes(selectedTitre)) {
-                selectedTitre = titres[0];
-            }
-            
-            titres.forEach(titre => {
-                if (latest[titre] !== undefined) {
-                    const value = typeof latest[titre] === 'number' 
-                        ? latest[titre].toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
-                        : latest[titre];
-                    
-                    let variationHtml = '';
-                    if (previous && previous[titre] !== undefined && typeof latest[titre] === 'number') {
-                        const currentVal = parseFloat(latest[titre]);
-                        const prevVal = parseFloat(previous[titre]);
-                        if (prevVal !== 0) {
-                            const variation = ((currentVal - prevVal) / prevVal) * 100;
-                            const isPositive = variation >= 0;
-                            const arrow = isPositive ? '↑' : '↓';
-                            const sign = isPositive ? '+' : '';
-                            variationHtml = `
-                                <div class="card-variation ${isPositive ? 'positive' : 'negative'}">
-                                    <span class="arrow">${arrow}</span>
-                                    <span>${sign}${variation.toFixed(2)}%</span>
-                                </div>
-                            `;
-                        }
-                    }
-                    
-                    const isSelected = titre === selectedTitre ? 'selected' : '';
-                    
-                    html += `
-                        <div class="card ${isSelected}" onclick="selectTitre('${titre}')">
-                            <div class="card-header">
-                                <span class="card-title">${titre}</span>
-                            </div>
-                            <div class="card-value">${value}</div>
-                            ${variationHtml}
-                        </div>
-                    `;
-                }
-            });
-            html += '</div>';
-
-            /* Sur la page Cours on affiche maintenant
-               le camembert de répartition (avec %)
-               à la place du graphique d’évolution */
-            html += `
-                <div class="chart-container">
-                    <div class="chart-title">🥧 Répartition du Portfolio (par valorisation)</div>
-                    <div class="chart-wrapper" style="height: 350px;">
-                        <canvas id="chartRepartitionCours"></canvas>
-                    </div>
-                </div>
-            `;
-
-            content.innerHTML = html;
-            currentData = data;
-            currentHeaders = headers;
-            // On reconstruit la répartition à partir du portfolio déjà chargé en mémoire si besoin
-            if (window._lastPortfolioData) {
-                createRepartitionChart(window._lastPortfolioData, 'chartRepartitionCours');
-            }
-        }
-
-        function selectTitre(titre) {
-            selectedTitre = titre;
-            if (currentData && currentHeaders) {
-                displayCours(currentData, currentHeaders);
-            }
-        }
-
-        // ==== PORTFOLIO ====
-        async function loadPortfolio() {
-            const content = document.getElementById('portfolio-content');
-            content.innerHTML = '<div class="loading">Chargement du portfolio...</div>';
-            
-            try {
-                const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_PORTFOLIO.ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_PORTFOLIO.NAME}`;
-                const response = await fetch(url);
-                const text = await response.text();
-                const jsonData = JSON.parse(text.substring(47, text.length - 2));
-                processPortfolioData(jsonData);
-            } catch (error) {
-                content.innerHTML = `
-                    <div class="error">
-                        ❌ Erreur de chargement du portfolio<br>
-                        Vérifiez que la feuille "BD" existe et est publique.<br>
-                        <small>${error.message}</small>
-                    </div>
-                `;
-            }
-        }
-
-        function processPortfolioData(data) {
-            const rows = data.table.rows;
-            const cols = data.table.cols;
-            const headers = cols.map(col => col.label);
-            
-            const portfolio = rows.map(row => {
-                const obj = {};
-                row.c.forEach((cell, i) => {
-                    if (cell) obj[headers[i]] = cell.v;
-                });
-                return obj;
-            }).filter(row => row[headers[0]]);
-
-            displayPortfolio(portfolio, headers);
-        }
-
-        function displayPortfolio(data, headers) {
-            const content = document.getElementById('portfolio-content');
-            
-            if (data.length === 0) {
-                content.innerHTML = '<div class="error">Aucune donnée trouvée dans la feuille "BD"</div>';
-                return;
-            }
-
-            // On garde les données en mémoire pour le graphe de la 1ère page
-            window._lastPortfolioData = data;
-
-            let totalNb = 0, totalInvesti = 0, totalValorisation = 0;
-            let bestGain = { ticker: '', gain: -Infinity, percent: 0 };
-            let worstGain = { ticker: '', gain: Infinity, percent: 0 };
-
-            data.forEach(row => {
-                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
-                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
-                const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
-                
-                const valorisation = nb * cours;
-                const gain = valorisation - investi;
-                const gainPercent = investi > 0 ? (gain / investi) * 100 : 0;
-
-                totalNb += nb;
-                totalInvesti += investi;
-                totalValorisation += valorisation;
-
-                if (gain > bestGain.gain) bestGain = { ticker: row[headers[0]], gain, percent: gainPercent };
-                if (gain < worstGain.gain) worstGain = { ticker: row[headers[0]], gain, percent: gainPercent };
-
-                row._calculated = { valorisation, gain, gainPercent };
-            });
-
-            const totalGain = totalValorisation - totalInvesti;
-            const totalGainPercent = totalInvesti > 0 ? (totalGain / totalInvesti) * 100 : 0;
-
-            // Séparation Actions / OPCVM
-            const actions = [];
-            const opcvm = [];
-            data.forEach(row => {
-                const ticker = row[headers[0]] ? row[headers[0]].toString().toUpperCase() : '';
-                if (ticker.includes('MOUCHARAKA') || ticker.includes('OPCVM')) {
-                    opcvm.push(row);
-                } else {
-                    actions.push(row);
-                }
-            });
-
-            let html = `
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>Total Titres</h3>
-                        <div class="value">${totalNb.toLocaleString('fr-FR')}</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>Montant Investi</h3>
-                        <div class="value">${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>Valorisation</h3>
-                        <div class="value">${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</div>
-                    </div>
-                    <div class="summary-card ${totalGain >= 0 ? 'positive' : 'negative'}">
-                        <h3>Gain/Perte Total</h3>
-                        <div class="value">
-                            ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
-                            <br><small>(${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-title">🥧 Répartition du Portfolio (par valorisation)</div>
-                    <div class="chart-wrapper" style="height: 350px;">
-                        <canvas id="chartRepartition"></canvas>
-                    </div>
-                </div>
-
-                <div class="best-worst">
-                    <div class="best-worst-card best">
-                        <h3>📈 Meilleure Performance</h3>
-                        <div class="ticker-name">${bestGain.ticker}</div>
-                        <div class="gain-value positive">
-                            +${bestGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
-                            <br><small>(+${bestGain.percent.toFixed(2)}%)</small>
-                        </div>
-                    </div>
-                    <div class="best-worst-card worst">
-                        <h3>📉 Plus Grande Perte</h3>
-                        <div class="ticker-name">${worstGain.ticker}</div>
-                        <div class="gain-value negative">
-                            ${worstGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
-                            <br><small>(${worstGain.percent.toFixed(2)}%)</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <div class="chart-title">📋 Détail du Portfolio - Actions</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Titre</th>
-                                <th>Nb</th>
-                                <th>Cours</th>
-                                <th>Investi</th>
-                                <th>Valorisation</th>
-                                <th>Gains</th>
-                                <th>%</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            function addRows(rows) {
-                rows.forEach(row => {
-                    const calc = row._calculated;
-                    const ticker = row[headers[0]];
-                    const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
-                    const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
-                    const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
-                    
-                    html += `
-                        <tr>
-                            <td class="ticker">${ticker}</td>
-                            <td>${nb.toLocaleString('fr-FR')}</td>
-                            <td>${cours.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                            <td>${investi.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                            <td>${calc.valorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                            <td class="${calc.gain >= 0 ? 'positive' : 'negative'}">
-                                ${calc.gain >= 0 ? '+' : ''}${calc.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
-                            </td>
-                            <td class="${calc.gainPercent >= 0 ? 'positive' : 'negative'}">
-                                ${calc.gainPercent >= 0 ? '+' : ''}${calc.gainPercent.toFixed(2)}%
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-
-            // lignes actions
-            addRows(actions);
-
-            html += `
-                        <tr class="total-row">
-                            <td>TOTAL</td>
-                            <td>${totalNb.toLocaleString('fr-FR')}</td>
-                            <td>-</td>
-                            <td>${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                            <td>${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                            <td class="${totalGain >= 0 ? 'positive' : 'negative'}">
-                                ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
-                            </td>
-                            <td class="${totalGainPercent >= 0 ? 'positive' : 'negative'}">
-                                ${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            // Tableau OPCVM
-            html += `
-                <div class="table-container" style="margin-top:20px;">
-                    <div class="chart-title">📋 Détail du Portfolio - OPCVM</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Titre</th>
-                                <th>Nb</th>
-                                <th>Cours</th>
-                                <th>Investi</th>
-                                <th>Valorisation</th>
-                                <th>Gains</th>
-                                <th>%</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            addRows(opcvm);
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            content.innerHTML = html;
-            createRepartitionChart(data, 'chartRepartition');
-        }
-        
-        function createRepartitionChart(data, canvasId) {
-            const actionsOnly = data.filter(row => {
-                const ticker = row[Object.keys(row)[0]];
-                return ticker && !ticker.toString().toUpperCase().includes('MOUCHARAKA') && !ticker.toString().toUpperCase().includes('OPCVM');
-            });
-            
-            if (actionsOnly.length === 0) return;
-            
-            const labels = [];
-            const values = [];
-            const backgroundColors = [
-                '#2E7D32',
-                '#1565C0',
-                '#C62828',
-                '#F57C00',
-                '#6A1B9A',
-                '#00796B',
-                '#E64A19',
-                '#5D4037',
-                '#455A64',
-                '#AD1457'
-            ];
-            
-            let totalValorisation = 0;
-            
-            actionsOnly.forEach(row => {
-                const ticker = row[Object.keys(row)[0]];
-                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
-                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
-                const valorisation = nb * cours;
-                
-                if (valorisation > 0) {
-                    labels.push(ticker);
-                    values.push(valorisation);
-                    totalValorisation += valorisation;
-                }
-            });
-            
-            const percentages = values.map(v => ((v / totalValorisation) * 100).toFixed(1));
-            
-            const ctx = document.getElementById(canvasId);
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: labels.map((label, i) => `${label} (${percentages[i]}%)`),
-                        datasets: [{
-                            data: values,
-                            backgroundColor: backgroundColors.slice(0, labels.length),
-                            borderColor: '#fff',
-                            borderWidth: 2,
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    font: { size: 11 },
-                                    padding: 15,
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        return data.labels.map((label, i) => ({
-                                            text: label,
-                                            fillStyle: data.datasets[0].backgroundColor[i],
-                                            hidden: false,
-                                            index: i
-                                        }));
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const value = context.parsed;
-                                        const percentage = ((value / totalValorisation) * 100).toFixed(1);
-                                        return `${context.label.split('(')[0]}: ${value.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        loadCours();
-        loadPortfolio();
-    </script>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="fr"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="theme-color" content="#2E7D32"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Ma Bourse&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="manifest" href="manifest.json"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="apple-touch-icon" href="icon-192x192.png"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>* {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>min-height: 100vh;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1200px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 auto;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>header {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 35px 25px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 15px 50px rgba(26, 35, 126, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>header::before {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content: '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: -50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>right: -50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>header h1 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 2em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>header p {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.9;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.1em;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tabs {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 20px 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>flex-wrap: wrap;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-btn {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255,255,255,0.15);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid rgba(255,255,255,0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 30px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 25px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-btn:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255,255,255,0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 5px 15px rgba(0,0,0,0.2);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-btn.active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #1a237e;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 5px 15px rgba(0,0,0,0.2);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.refresh-btn {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 28px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 25px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 15px rgba(245, 124, 0, 0.4);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.refresh-btn:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 6px 20px rgba(245, 124, 0, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.last-update {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.9em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.8;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-content {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-content.active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.cards-grid {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@media (max-width: 480px) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>.cards-grid {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>grid-template-columns: repeat(3, 1fr);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 8px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 12px rgba(0,0,0,0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s ease;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(0,0,0,0.05);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card::before {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content: '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>right: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 3px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(90deg, #2E7D32, #4CAF50);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.7;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-4px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 8px 20px rgba(0,0,0,0.15);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card.selected {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #1a237e;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 15px rgba(26, 35, 126, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card.selected::before {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-header {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-title {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.75em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-transform: uppercase;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 0.5px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-value {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.1em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #333;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-variation {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.75em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 3px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 2px 6px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 2px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-variation.positive {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #2E7D32;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(46, 125, 50, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-variation.negative {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #C62828;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(198, 40, 40, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-variation .arrow {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.9em;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card-date {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.global-date {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.2em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #1a237e;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #ffffff 0%, #e8eaf6 100%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 25px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 25px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: inline-block;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 15px rgba(26, 35, 126, 0.15);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(26, 35, 126, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.summary-cards {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(4, 1fr);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@media (max-width: 768px) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>.summary-cards {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>grid-template-columns: repeat(2, 1fr);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.summary-card {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 8px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 3px 10px rgba(0,0,0,0.08);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.summary-card h3 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.65em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #666;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 6px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-transform: uppercase;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 0.5px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.summary-card .value {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.95em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #333;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1.2;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.summary-card.positive .value {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #2E7D32;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.summary-card.negative .value {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #C62828;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chart-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 5px 20px rgba(0,0,0,0.08);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chart-title {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.3em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #333;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chart-wrapper {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 300px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.table-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 5px 20px rgba(0,0,0,0.08);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow-x: auto;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>table {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-collapse: collapse;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.95em;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>th, td {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: right;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 1px solid #eee;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>th:first-child, td:first-child {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: left;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>th {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #f8f9fa;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: sticky;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>tr:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #f8f9fa;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.ticker {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #1565C0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.positive {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #2E7D32;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.negative {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #C62828;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.total-row {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #E3F2FD !important;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst-card {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 5px 20px rgba(0,0,0,0.08);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst-card h3 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst-card.best h3 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #2E7D32;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst-card.worst h3 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #C62828;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst-card .ticker-name {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.3em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 5px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.best-worst-card .gain-value {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.5em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.loading {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 50px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.2em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #666;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.error {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #FFEBEE;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #C62828;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 20px 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@media (max-width: 768px) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>header h1 {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>font-size: 1.5em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>.card-value {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>font-size: 1.5em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>.chart-wrapper {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>height: 250px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>th, td {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>padding: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>font-size: 0.85em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>.tab-btn {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>padding: 10px 20px;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>font-size: 0.9em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;header&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h1&gt;📈 Ma Bourse&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p&gt;Suivi des cours et du portfolio&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="tabs"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-btn active" onclick="showTab('cours')"&gt;📊 Cours&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-btn" onclick="showTab('portfolio')"&gt;💼 Portfolio&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="refresh-btn" onclick="refreshAll()"&gt;🔄 Actualiser&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="last-update" id="lastUpdate"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/header&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Onglet COURS --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="cours" class="tab-content active"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="cours-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="loading"&gt;Chargement des cours...&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Onglet PORTFOLIO --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="portfolio" class="tab-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="portfolio-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="loading"&gt;Chargement du portfolio...&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const CONFIG = {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>SHEET_COURS: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>NAME: 'Cours_Quotidien'</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>SHEET_PORTFOLIO: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>NAME: 'BD'</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>let chart = null;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentData = null;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentHeaders = null;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let selectedTitre = null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function formatDateJJMMAAAA(dateValue) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!dateValue) return '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (typeof dateValue === 'object' &amp;&amp; dateValue instanceof Date) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const jour = String(dateValue.getDate()).padStart(2, '0');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const mois = String(dateValue.getMonth() + 1).padStart(2, '0');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const annee = dateValue.getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return `${jour}/${mois}/${annee}`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (typeof dateValue === 'string' &amp;&amp; dateValue.includes('Date(')) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const match = dateValue.match(/Date\((\d+),(\d+),(\d+)\)/);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (match) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const annee = match[1];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const mois = String(parseInt(match[2], 10) + 1).padStart(2, '0');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const jour = String(match[3]).padStart(2, '0');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return `${jour}/${mois}/${annee}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (typeof dateValue === 'string' &amp;&amp; dateValue.includes('-')) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const parts = dateValue.split('-');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (parts.length === 3) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return `${parts[2]}/${parts[1]}/${parts[0]}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return String(dateValue);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function normalizeHeader(label) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return String(label || '')</p>
+<p class="p1"><span class="Apple-converted-space">                </span>.trim()</p>
+<p class="p1"><span class="Apple-converted-space">                </span>.replace(/\s+/g, '_')</p>
+<p class="p1"><span class="Apple-converted-space">                </span>.replace(/[^A-Za-z0-9_]/g, '_');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function showTab(tabName) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.tab-content').forEach(tab =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>tab.classList.remove('active');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.tab-btn').forEach(btn =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>btn.classList.remove('active');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById(tabName).classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>event.target.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function refreshAll() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadCours();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadPortfolio();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('lastUpdate').textContent =<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>'Dernière mise à jour : ' + new Date().toLocaleString('fr-FR');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ==== COURS ====</p>
+<p class="p1"><span class="Apple-converted-space">        </span>async function loadCours() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const content = document.getElementById('cours-content');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content.innerHTML = '&lt;div class="loading"&gt;Chargement des cours...&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_COURS.ID}/gviz/tq?tqx=out:json&amp;sheet=${CONFIG.SHEET_COURS.NAME}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const response = await fetch(url);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const text = await response.text();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const jsonData = JSON.parse(text.substring(47, text.length - 2));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>processCoursData(jsonData);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>content.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="error"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>❌ Erreur de chargement des cours&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;small&gt;${error.message}&lt;/small&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function processCoursData(data) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const rows = data.table.rows;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const cols = data.table.cols;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const headers = cols.map(col =&gt; col.label);</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const dataPoints = rows.map((row, index) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const obj = { index };</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.c.forEach((cell, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!cell) return;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const label = headers[i];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>obj[label] = cell.v;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const norm = normalizeHeader(label);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (norm &amp;&amp; norm !== label) obj[norm] = cell.v;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return obj;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}).filter(row =&gt; row[headers[0]] || row[normalizeHeader(headers[0])]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>displayCours(dataPoints, headers);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function displayCours(data, headers) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const content = document.getElementById('cours-content');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (data.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>content.innerHTML = '&lt;div class="error"&gt;Aucune donnée trouvée&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const latest = data[data.length - 1];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const previous = data.length &gt; 1 ? data[data.length - 2] : null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const titres = ['AKDITAL', 'ALLIANCE', 'TGCC', 'MED_PAPER', 'IAM', 'ENNAKL', 'SGTM'];</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let dateStr = latest['DATE'] || latest[headers[0]] || latest[normalizeHeader(headers[0])] || '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>dateStr = formatDateJJMMAAAA(dateStr);</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let html = `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style="text-align: center; margin-bottom: 12px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="global-date"&gt;📅 ${dateStr}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="cards-grid"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!selectedTitre || !titres.includes(selectedTitre)) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>selectedTitre = titres[0];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>titres.forEach(titre =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (latest[titre] !== undefined) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const value = typeof latest[titre] === 'number'<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>? latest[titre].toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>: latest[titre];</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let variationHtml = '';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (previous &amp;&amp; previous[titre] !== undefined &amp;&amp; typeof latest[titre] === 'number') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const currentVal = parseFloat(latest[titre]);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const prevVal = parseFloat(previous[titre]);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (prevVal !== 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const variation = ((currentVal - prevVal) / prevVal) * 100;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const isPositive = variation &gt;= 0;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const arrow = isPositive ? '↑' : '↓';</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const sign = isPositive ? '+' : '';</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>variationHtml = `</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;div class="card-variation ${isPositive ? 'positive' : 'negative'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;span class="arrow"&gt;${arrow}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;span&gt;${sign}${variation.toFixed(2)}%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const isSelected = titre === selectedTitre ? 'selected' : '';</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>html += `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="card ${isSelected}" onclick="selectTitre('${titre}')"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="card-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="card-title"&gt;${titre}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="card-value"&gt;${value}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>${variationHtml}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>html += '&lt;/div&gt;';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Sur la page Cours on affiche maintenant</p>
+<p class="p1"><span class="Apple-converted-space">               </span>le camembert de répartition (avec %)</p>
+<p class="p1"><span class="Apple-converted-space">               </span>à la place du graphique d’évolution */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>html += `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-title"&gt;🥧 Répartition du Portfolio (par valorisation)&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-wrapper" style="height: 350px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="chartRepartitionCours"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>content.innerHTML = html;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentData = data;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentHeaders = headers;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// On reconstruit la répartition à partir du portfolio déjà chargé en mémoire si besoin</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (window._lastPortfolioData) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>createRepartitionChart(window._lastPortfolioData, 'chartRepartitionCours');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function selectTitre(titre) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>selectedTitre = titre;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (currentData &amp;&amp; currentHeaders) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>displayCours(currentData, currentHeaders);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ==== PORTFOLIO ====</p>
+<p class="p1"><span class="Apple-converted-space">        </span>async function loadPortfolio() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const content = document.getElementById('portfolio-content');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content.innerHTML = '&lt;div class="loading"&gt;Chargement du portfolio...&lt;/div&gt;';</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_PORTFOLIO.ID}/gviz/tq?tqx=out:json&amp;sheet=${CONFIG.SHEET_PORTFOLIO.NAME}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const response = await fetch(url);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const text = await response.text();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const jsonData = JSON.parse(text.substring(47, text.length - 2));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>processPortfolioData(jsonData);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>content.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="error"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>❌ Erreur de chargement du portfolio&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Vérifiez que la feuille "BD" existe et est publique.&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;small&gt;${error.message}&lt;/small&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function processPortfolioData(data) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const rows = data.table.rows;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const cols = data.table.cols;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const headers = cols.map(col =&gt; col.label);</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const portfolio = rows.map(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const obj = {};</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.c.forEach((cell, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (cell) obj[headers[i]] = cell.v;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return obj;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}).filter(row =&gt; row[headers[0]]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>displayPortfolio(portfolio, headers);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function displayPortfolio(data, headers) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const content = document.getElementById('portfolio-content');</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (data.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>content.innerHTML = '&lt;div class="error"&gt;Aucune donnée trouvée dans la feuille "BD"&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// On garde les données en mémoire pour le graphe de la 1ère page</p>
+<p class="p1"><span class="Apple-converted-space">            </span>window._lastPortfolioData = data;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let totalNb = 0, totalInvesti = 0, totalValorisation = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let bestGain = { ticker: '', gain: -Infinity, percent: 0 };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let worstGain = { ticker: '', gain: Infinity, percent: 0 };</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>data.forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const valorisation = nb * cours;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const gain = valorisation - investi;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const gainPercent = investi &gt; 0 ? (gain / investi) * 100 : 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>totalNb += nb;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>totalInvesti += investi;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>totalValorisation += valorisation;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (gain &gt; bestGain.gain) bestGain = { ticker: row[headers[0]], gain, percent: gainPercent };</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (gain &lt; worstGain.gain) worstGain = { ticker: row[headers[0]], gain, percent: gainPercent };</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>row._calculated = { valorisation, gain, gainPercent };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const totalGain = totalValorisation - totalInvesti;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const totalGainPercent = totalInvesti &gt; 0 ? (totalGain / totalInvesti) * 100 : 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Séparation Actions / OPCVM</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const actions = [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const opcvm = [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>data.forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ticker = row[headers[0]] ? row[headers[0]].toString().toUpperCase() : '';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (ticker.includes('MOUCHARAKA') || ticker.includes('OPCVM')) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>opcvm.push(row);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>actions.push(row);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let html = `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="summary-cards"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="summary-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3&gt;Total Titres&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="value"&gt;${totalNb.toLocaleString('fr-FR')}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="summary-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3&gt;Montant Investi&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="value"&gt;${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="summary-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3&gt;Valorisation&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="value"&gt;${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="summary-card ${totalGain &gt;= 0 ? 'positive' : 'negative'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3&gt;Gain/Perte Total&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="value"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>${totalGain &gt;= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;br&gt;&lt;small&gt;(${totalGainPercent &gt;= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)&lt;/small&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-title"&gt;🥧 Répartition du Portfolio (par valorisation)&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-wrapper" style="height: 350px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="chartRepartition"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="best-worst"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="best-worst-card best"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3&gt;📈 Meilleure Performance&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="ticker-name"&gt;${bestGain.ticker}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="gain-value positive"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>+${bestGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;br&gt;&lt;small&gt;(+${bestGain.percent.toFixed(2)}%)&lt;/small&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="best-worst-card worst"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3&gt;📉 Plus Grande Perte&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="ticker-name"&gt;${worstGain.ticker}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="gain-value negative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>${worstGain.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;br&gt;&lt;small&gt;(${worstGain.percent.toFixed(2)}%)&lt;/small&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="table-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-title"&gt;📋 Détail du Portfolio - Actions&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Titre&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Nb&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Cours&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Investi&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Valorisation&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Gains&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;%&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>function addRows(rows) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rows.forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const calc = row._calculated;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const ticker = row[headers[0]];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>html += `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td class="ticker"&gt;${ticker}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${nb.toLocaleString('fr-FR')}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${cours.toLocaleString('fr-FR', {minimumFractionDigits: 2})}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${investi.toLocaleString('fr-FR', {minimumFractionDigits: 2})}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${calc.valorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td class="${calc.gain &gt;= 0 ? 'positive' : 'negative'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>${calc.gain &gt;= 0 ? '+' : ''}${calc.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td class="${calc.gainPercent &gt;= 0 ? 'positive' : 'negative'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>${calc.gainPercent &gt;= 0 ? '+' : ''}${calc.gainPercent.toFixed(2)}%</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// lignes actions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>addRows(actions);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>html += `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tr class="total-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;TOTAL&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${totalNb.toLocaleString('fr-FR')}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;-&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${totalInvesti.toLocaleString('fr-FR', {minimumFractionDigits: 2})}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td&gt;${totalValorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td class="${totalGain &gt;= 0 ? 'positive' : 'negative'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>${totalGain &gt;= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;td class="${totalGainPercent &gt;= 0 ? 'positive' : 'negative'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>${totalGainPercent &gt;= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Tableau OPCVM</p>
+<p class="p1"><span class="Apple-converted-space">            </span>html += `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="table-container" style="margin-top:20px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-title"&gt;📋 Détail du Portfolio - OPCVM&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Titre&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Nb&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Cours&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Investi&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Valorisation&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;Gains&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;th&gt;%&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>addRows(opcvm);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>html += `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>content.innerHTML = html;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>createRepartitionChart(data, 'chartRepartition');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function createRepartitionChart(data, canvasId) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const actionsOnly = data.filter(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ticker = row[Object.keys(row)[0]];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return ticker &amp;&amp; !ticker.toString().toUpperCase().includes('MOUCHARAKA') &amp;&amp; !ticker.toString().toUpperCase().includes('OPCVM');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (actionsOnly.length === 0) return;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const labels = [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const values = [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const backgroundColors = [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#2E7D32',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#1565C0',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#C62828',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#F57C00',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#6A1B9A',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#00796B',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#E64A19',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#5D4037',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#455A64',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>'#AD1457'</p>
+<p class="p1"><span class="Apple-converted-space">            </span>];</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let totalValorisation = 0;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>actionsOnly.forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ticker = row[Object.keys(row)[0]];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const valorisation = nb * cours;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (valorisation &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels.push(ticker);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>values.push(valorisation);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>totalValorisation += valorisation;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const percentages = values.map(v =&gt; ((v / totalValorisation) * 100).toFixed(1));</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const ctx = document.getElementById(canvasId);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (ctx) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>new Chart(ctx, {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>type: 'pie',</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>labels: labels.map((label, i) =&gt; `${label} (${percentages[i]}%)`),</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>data: values,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>backgroundColor: backgroundColors.slice(0, labels.length),</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor: '#fff',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderWidth: 2,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>hoverOffset: 10</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>options: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>responsive: true,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>maintainAspectRatio: false,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>plugins: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>legend: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>position: 'right',</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>labels: {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>font: { size: 11 },</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>padding: 15,</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>generateLabels: function(chart) {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>const data = chart.data;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>return data.labels.map((label, i) =&gt; ({</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>text: label,</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>fillStyle: data.datasets[0].backgroundColor[i],</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>hidden: false,</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>index: i</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>}));</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>tooltip: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>callbacks: {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>label: function(context) {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>const value = context.parsed;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>const percentage = ((value / totalValorisation) * 100).toFixed(1);</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>return `${context.label.split('(')[0]}: ${value.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD (${percentage}%)`;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>loadCours();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>loadPortfolio();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
 </body>
 </html>
