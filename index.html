@@ -64,7 +64,6 @@
             font-size: 1.1em;
         }
         
-        /* Onglets */
         .tabs {
             display: flex;
             gap: 10px;
@@ -126,7 +125,6 @@
             opacity: 0.8;
         }
         
-        /* Contenu des onglets */
         .tab-content {
             display: none;
         }
@@ -135,7 +133,6 @@
             display: block;
         }
         
-        /* Cards - Ultra Compact */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -240,7 +237,6 @@
             display: none;
         }
         
-        /* Date header global */
         .global-date {
             text-align: center;
             margin-bottom: 15px;
@@ -255,7 +251,6 @@
             border: 1px solid rgba(26, 35, 126, 0.1);
         }
         
-        /* Portfolio summary cards - Compact 4 per row */
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -300,7 +295,6 @@
             color: #C62828;
         }
         
-        /* Charts */
         .chart-container {
             background: white;
             border-radius: 15px;
@@ -324,7 +318,6 @@
             height: 300px;
         }
         
-        /* Tables */
         .table-container {
             background: white;
             border-radius: 15px;
@@ -379,7 +372,6 @@
             font-weight: bold;
         }
         
-        /* Best/Worst */
         .best-worst {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -421,7 +413,6 @@
             font-weight: bold;
         }
         
-        /* Loading & Error */
         .loading {
             text-align: center;
             padding: 50px;
@@ -468,13 +459,10 @@
         <header>
             <h1>📈 Ma Bourse</h1>
             <p>Suivi des cours et du portfolio</p>
-            
-            <!-- Onglets -->
             <div class="tabs">
                 <button class="tab-btn active" onclick="showTab('cours')">📊 Cours</button>
                 <button class="tab-btn" onclick="showTab('portfolio')">💼 Portfolio</button>
             </div>
-            
             <button class="refresh-btn" onclick="refreshAll()">🔄 Actualiser</button>
             <div class="last-update" id="lastUpdate"></div>
         </header>
@@ -495,7 +483,6 @@
     </div>
 
     <script>
-        // Configuration
         const CONFIG = {
             SHEET_COURS: {
                 ID: '19mqJneAZsFcTkoHAgxs6c8nUbRHgSYttmU4X1borF0s',
@@ -512,19 +499,14 @@
         let currentHeaders = null;
         let selectedTitre = null;
 
-        // === Utils ===
         function formatDateJJMMAAAA(dateValue) {
             if (!dateValue) return '';
-
-            // Date object
             if (typeof dateValue === 'object' && dateValue instanceof Date) {
                 const jour = String(dateValue.getDate()).padStart(2, '0');
                 const mois = String(dateValue.getMonth() + 1).padStart(2, '0');
                 const annee = dateValue.getFullYear();
                 return `${jour}/${mois}/${annee}`;
             }
-
-            // String: Date(YYYY,M,D)
             if (typeof dateValue === 'string' && dateValue.includes('Date(')) {
                 const match = dateValue.match(/Date\((\d+),(\d+),(\d+)\)/);
                 if (match) {
@@ -534,15 +516,12 @@
                     return `${jour}/${mois}/${annee}`;
                 }
             }
-
-            // String: YYYY-MM-DD
             if (typeof dateValue === 'string' && dateValue.includes('-')) {
                 const parts = dateValue.split('-');
                 if (parts.length === 3) {
                     return `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
             }
-
             return String(dateValue);
         }
 
@@ -553,22 +532,17 @@
                 .replace(/[^A-Za-z0-9_]/g, '_');
         }
 
-        // Afficher un onglet
         function showTab(tabName) {
-            // Masquer tous les onglets
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
-            // Afficher l'onglet sélectionné
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
 
-        // Rafraîchir tout
         function refreshAll() {
             loadCours();
             loadPortfolio();
@@ -576,19 +550,16 @@
                 'Dernière mise à jour : ' + new Date().toLocaleString('fr-FR');
         }
 
-        // ========== CHARGEMENT COURS ==========
+        // ==== COURS ====
         async function loadCours() {
             const content = document.getElementById('cours-content');
             content.innerHTML = '<div class="loading">Chargement des cours...</div>';
-            
             try {
                 const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_COURS.ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_COURS.NAME}`;
                 const response = await fetch(url);
                 const text = await response.text();
                 const jsonData = JSON.parse(text.substring(47, text.length - 2));
-                
                 processCoursData(jsonData);
-                    
             } catch (error) {
                 content.innerHTML = `
                     <div class="error">
@@ -610,15 +581,13 @@
                     if (!cell) return;
                     const label = headers[i];
                     obj[label] = cell.v;
-                    // Ajouter une clé normalisée (ex: "MED PAPER" -> "MED_PAPER")
                     const norm = normalizeHeader(label);
                     if (norm && norm !== label) obj[norm] = cell.v;
                 });
                 return obj;
             }).filter(row => row[headers[0]] || row[normalizeHeader(headers[0])]);
 
-            const recentData = dataPoints.slice(-30);
-            displayCours(recentData, headers);
+            displayCours(dataPoints, headers);
         }
 
         function displayCours(data, headers) {
@@ -632,7 +601,6 @@
             const previous = data.length > 1 ? data[data.length - 2] : null;
             const titres = ['AKDITAL', 'ALLIANCE', 'TGCC', 'MED_PAPER', 'IAM', 'ENNAKL', 'SGTM'];
             
-            // Date header global - format JJ/MM/AAAA
             let dateStr = latest['DATE'] || latest[headers[0]] || latest[normalizeHeader(headers[0])] || '';
             dateStr = formatDateJJMMAAAA(dateStr);
             
@@ -643,7 +611,6 @@
                 <div class="cards-grid">
             `;
             
-            // Sélectionner le premier titre par défaut
             if (!selectedTitre || !titres.includes(selectedTitre)) {
                 selectedTitre = titres[0];
             }
@@ -654,7 +621,6 @@
                         ? latest[titre].toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
                         : latest[titre];
                     
-                    // Calcul variation
                     let variationHtml = '';
                     if (previous && previous[titre] !== undefined && typeof latest[titre] === 'number') {
                         const currentVal = parseFloat(latest[titre]);
@@ -688,12 +654,14 @@
             });
             html += '</div>';
 
-            // Un seul graphique histogramme
+            /* Sur la page Cours on affiche maintenant
+               le camembert de répartition (avec %)
+               à la place du graphique d’évolution */
             html += `
                 <div class="chart-container">
-                    <div class="chart-title">📊 Évolution de ${selectedTitre} (30 derniers jours)</div>
-                    <div class="chart-wrapper">
-                        <canvas id="chartHistogramme"></canvas>
+                    <div class="chart-title">🥧 Répartition du Portfolio (par valorisation)</div>
+                    <div class="chart-wrapper" style="height: 350px;">
+                        <canvas id="chartRepartitionCours"></canvas>
                     </div>
                 </div>
             `;
@@ -701,94 +669,20 @@
             content.innerHTML = html;
             currentData = data;
             currentHeaders = headers;
-            createHistogramme(data, selectedTitre);
+            // On reconstruit la répartition à partir du portfolio déjà chargé en mémoire si besoin
+            if (window._lastPortfolioData) {
+                createRepartitionChart(window._lastPortfolioData, 'chartRepartitionCours');
+            }
         }
 
         function selectTitre(titre) {
             selectedTitre = titre;
-            // Rafraîchir l'affichage
             if (currentData && currentHeaders) {
                 displayCours(currentData, currentHeaders);
             }
         }
 
-        function createHistogramme(data, titre) {
-            const dates = data.map(d => formatDateJJMMAAAA(d['DATE'] || d[Object.keys(d)[0]]));
-            const values = data.map(d => d[titre]);
-            const colors = {
-                'AKDITAL': '#2E7D32',
-                'ALLIANCE': '#1565C0',
-                'TGCC': '#C62828',
-                'MED_PAPER': '#F57C00',
-                'IAM': '#6A1B9A',
-                'ENNAKL': '#00796B',
-                'SGTM': '#E64A19'
-            };
-            
-            // Calculer les variations pour colorer les barres
-            const backgroundColors = values.map((val, idx) => {
-                if (idx === 0) return colors[titre] || '#333';
-                const prev = values[idx - 1];
-                return val >= prev ? '#2E7D32' : '#C62828';
-            });
-
-            const ctx = document.getElementById('chartHistogramme');
-            if (ctx) {
-                // Détruire le graphique précédent s'il existe
-                if (chart) {
-                    chart.destroy();
-                }
-                
-                chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: dates,
-                        datasets: [{
-                            label: titre,
-                            data: values,
-                            backgroundColor: backgroundColors,
-                            borderColor: colors[titre] || '#333',
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.parsed.y.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: false,
-                                grid: { color: 'rgba(0,0,0,0.05)' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return value.toLocaleString('fr-FR');
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: { display: false }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
-                        }
-                    }
-                });
-            }
-        }
-
-        // ========== CHARGEMENT PORTFOLIO ==========
+        // ==== PORTFOLIO ====
         async function loadPortfolio() {
             const content = document.getElementById('portfolio-content');
             content.innerHTML = '<div class="loading">Chargement du portfolio...</div>';
@@ -798,9 +692,7 @@
                 const response = await fetch(url);
                 const text = await response.text();
                 const jsonData = JSON.parse(text.substring(47, text.length - 2));
-                
                 processPortfolioData(jsonData);
-                    
             } catch (error) {
                 content.innerHTML = `
                     <div class="error">
@@ -836,6 +728,9 @@
                 return;
             }
 
+            // On garde les données en mémoire pour le graphe de la 1ère page
+            window._lastPortfolioData = data;
+
             let totalNb = 0, totalInvesti = 0, totalValorisation = 0;
             let bestGain = { ticker: '', gain: -Infinity, percent: 0 };
             let worstGain = { ticker: '', gain: Infinity, percent: 0 };
@@ -862,6 +757,18 @@
             const totalGain = totalValorisation - totalInvesti;
             const totalGainPercent = totalInvesti > 0 ? (totalGain / totalInvesti) * 100 : 0;
 
+            // Séparation Actions / OPCVM
+            const actions = [];
+            const opcvm = [];
+            data.forEach(row => {
+                const ticker = row[headers[0]] ? row[headers[0]].toString().toUpperCase() : '';
+                if (ticker.includes('MOUCHARAKA') || ticker.includes('OPCVM')) {
+                    opcvm.push(row);
+                } else {
+                    actions.push(row);
+                }
+            });
+
             let html = `
                 <div class="summary-cards">
                     <div class="summary-card">
@@ -885,7 +792,6 @@
                     </div>
                 </div>
 
-                <!-- Camembert de répartition -->
                 <div class="chart-container">
                     <div class="chart-title">🥧 Répartition du Portfolio (par valorisation)</div>
                     <div class="chart-wrapper" style="height: 350px;">
@@ -913,7 +819,7 @@
                 </div>
 
                 <div class="table-container">
-                    <div class="chart-title">📋 Détail du Portfolio</div>
+                    <div class="chart-title">📋 Détail du Portfolio - Actions</div>
                     <table>
                         <thead>
                             <tr>
@@ -929,29 +835,34 @@
                         <tbody>
             `;
 
-            data.forEach(row => {
-                const calc = row._calculated;
-                const ticker = row[headers[0]];
-                const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
-                const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
-                const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
-                
-                html += `
-                    <tr>
-                        <td class="ticker">${ticker}</td>
-                        <td>${nb.toLocaleString('fr-FR')}</td>
-                        <td>${cours.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                        <td>${investi.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                        <td>${calc.valorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
-                        <td class="${calc.gain >= 0 ? 'positive' : 'negative'}">
-                            ${calc.gain >= 0 ? '+' : ''}${calc.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
-                        </td>
-                        <td class="${calc.gainPercent >= 0 ? 'positive' : 'negative'}">
-                            ${calc.gainPercent >= 0 ? '+' : ''}${calc.gainPercent.toFixed(2)}%
-                        </td>
-                    </tr>
-                `;
-            });
+            function addRows(rows) {
+                rows.forEach(row => {
+                    const calc = row._calculated;
+                    const ticker = row[headers[0]];
+                    const nb = parseFloat(row['Nb'] || row['Quantité'] || row['Qte'] || 0);
+                    const cours = parseFloat(row['Cours.Act'] || row['Cours'] || row['Cours Actuel'] || 0);
+                    const investi = parseFloat(row['Mt_Investi'] || row['Investi'] || row['Montant Investi'] || 0);
+                    
+                    html += `
+                        <tr>
+                            <td class="ticker">${ticker}</td>
+                            <td>${nb.toLocaleString('fr-FR')}</td>
+                            <td>${cours.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                            <td>${investi.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                            <td>${calc.valorisation.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                            <td class="${calc.gain >= 0 ? 'positive' : 'negative'}">
+                                ${calc.gain >= 0 ? '+' : ''}${calc.gain.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
+                            </td>
+                            <td class="${calc.gainPercent >= 0 ? 'positive' : 'negative'}">
+                                ${calc.gainPercent >= 0 ? '+' : ''}${calc.gainPercent.toFixed(2)}%
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // lignes actions
+            addRows(actions);
 
             html += `
                         <tr class="total-row">
@@ -972,15 +883,38 @@
                 </div>
             `;
 
+            // Tableau OPCVM
+            html += `
+                <div class="table-container" style="margin-top:20px;">
+                    <div class="chart-title">📋 Détail du Portfolio - OPCVM</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Nb</th>
+                                <th>Cours</th>
+                                <th>Investi</th>
+                                <th>Valorisation</th>
+                                <th>Gains</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            addRows(opcvm);
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
             content.innerHTML = html;
-            
-            // Créer le camembert de répartition (sans OPCVM)
-            createRepartitionChart(data);
+            createRepartitionChart(data, 'chartRepartition');
         }
         
-        // Créer le camembert de répartition du portfolio
-        function createRepartitionChart(data) {
-            // Filtrer pour exclure l'OPCVM AL MOUCHARAKA
+        function createRepartitionChart(data, canvasId) {
             const actionsOnly = data.filter(row => {
                 const ticker = row[Object.keys(row)[0]];
                 return ticker && !ticker.toString().toUpperCase().includes('MOUCHARAKA') && !ticker.toString().toUpperCase().includes('OPCVM');
@@ -991,16 +925,16 @@
             const labels = [];
             const values = [];
             const backgroundColors = [
-                '#2E7D32',  // AKDITAL - Vert
-                '#1565C0',  // ALLIANCE - Bleu
-                '#C62828',  // TGCC - Rouge
-                '#F57C00',  // MED PAPER - Orange
-                '#6A1B9A',  // IAM - Violet
-                '#00796B',  // ENNAKL - Turquoise
-                '#E64A19',  // SGTM - Rouge-orange
-                '#5D4037',  // Autre - Marron
-                '#455A64',  // Autre - Gris bleu
-                '#AD1457'   // Autre - Rose
+                '#2E7D32',
+                '#1565C0',
+                '#C62828',
+                '#F57C00',
+                '#6A1B9A',
+                '#00796B',
+                '#E64A19',
+                '#5D4037',
+                '#455A64',
+                '#AD1457'
             ];
             
             let totalValorisation = 0;
@@ -1018,10 +952,9 @@
                 }
             });
             
-            // Calculer les pourcentages
             const percentages = values.map(v => ((v / totalValorisation) * 100).toFixed(1));
             
-            const ctx = document.getElementById('chartRepartition');
+            const ctx = document.getElementById(canvasId);
             if (ctx) {
                 new Chart(ctx, {
                     type: 'pie',
@@ -1070,7 +1003,6 @@
             }
         }
 
-        // Charger au démarrage
         loadCours();
         loadPortfolio();
     </script>
