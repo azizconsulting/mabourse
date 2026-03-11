@@ -23,7 +23,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         
@@ -136,8 +136,8 @@
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 25px;
         }
         
         @media (max-width: 480px) {
@@ -147,13 +147,13 @@
         }
         
         .card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border-radius: 12px;
-            padding: 12px 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 15px;
+            padding: 16px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
             text-align: center;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 2px solid transparent;
             position: relative;
             overflow: hidden;
             cursor: pointer;
@@ -165,97 +165,93 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 4px;
             background: linear-gradient(90deg, #2E7D32, #4CAF50);
-            opacity: 0.7;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
         
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
         }
         
         .card.selected {
-            border: 2px solid #1a237e;
-            box-shadow: 0 0 15px rgba(26, 35, 126, 0.3);
+            border-color: #1a237e;
+            box-shadow: 0 6px 20px rgba(26, 35, 126, 0.25);
         }
         
         .card.selected::before {
             opacity: 1;
-            height: 4px;
         }
         
         .card-header {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
         
         .card-title {
-            font-size: 0.75em;
+            font-size: 0.8em;
             font-weight: 700;
-            color: #555;
+            color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
         .card-value {
-            font-size: 1.1em;
+            font-size: 1.3em;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 4px;
+            color: #1a237e;
+            margin-bottom: 6px;
         }
         
         .card-variation {
-            font-size: 0.75em;
+            font-size: 0.8em;
             font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            padding: 2px 6px;
-            border-radius: 12px;
-            margin-top: 2px;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-top: 4px;
         }
         
         .card-variation.positive {
             color: #2E7D32;
-            background: rgba(46, 125, 50, 0.1);
+            background: rgba(46, 125, 50, 0.12);
         }
         
         .card-variation.negative {
             color: #C62828;
-            background: rgba(198, 40, 40, 0.1);
+            background: rgba(198, 40, 40, 0.12);
         }
         
         .card-variation .arrow {
-            font-size: 0.9em;
-        }
-        
-        .card-date {
-            display: none;
+            font-size: 1em;
         }
         
         .global-date {
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-size: 1.3em;
             font-weight: 700;
             color: #1a237e;
-            background: linear-gradient(135deg, #ffffff 0%, #e8eaf6 100%);
-            padding: 10px 25px;
-            border-radius: 25px;
+            background: white;
+            padding: 12px 30px;
+            border-radius: 30px;
             display: inline-block;
             box-shadow: 0 4px 15px rgba(26, 35, 126, 0.15);
-            border: 1px solid rgba(26, 35, 126, 0.1);
+            border: 2px solid rgba(26, 35, 126, 0.1);
         }
         
         .summary-cards {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
         }
         
         @media (max-width: 768px) {
@@ -266,25 +262,33 @@
         
         .summary-card {
             background: white;
-            border-radius: 10px;
-            padding: 12px 8px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-radius: 15px;
+            padding: 20px 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             text-align: center;
+            border: 2px solid rgba(0,0,0,0.03);
+            transition: all 0.3s;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         
         .summary-card h3 {
-            font-size: 0.65em;
+            font-size: 0.7em;
             color: #666;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            font-weight: 600;
         }
         
         .summary-card .value {
-            font-size: 0.95em;
+            font-size: 1.1em;
             font-weight: bold;
-            color: #333;
-            line-height: 1.2;
+            color: #1a237e;
+            line-height: 1.4;
         }
         
         .summary-card.positive .value {
@@ -297,17 +301,18 @@
         
         .chart-container {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+            border: 2px solid rgba(0,0,0,0.03);
         }
         
         .chart-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #1a237e;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -315,15 +320,17 @@
         
         .chart-wrapper {
             position: relative;
-            height: 300px;
+            height: 400px;
         }
         
         .table-container {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
             overflow-x: auto;
+            margin-bottom: 25px;
+            border: 2px solid rgba(0,0,0,0.03);
         }
         
         table {
@@ -333,9 +340,9 @@
         }
         
         th, td {
-            padding: 12px;
+            padding: 14px 12px;
             text-align: right;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         th:first-child, td:first-child {
@@ -344,54 +351,86 @@
         
         th {
             background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
+            font-weight: 700;
+            color: #1a237e;
             position: sticky;
             top: 0;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
         }
         
-        tr:hover {
+        tbody tr {
+            transition: all 0.2s;
+        }
+        
+        tbody tr:hover {
             background: #f8f9fa;
+            transform: scale(1.01);
         }
         
         .ticker {
-            font-weight: 600;
+            font-weight: 700;
             color: #1565C0;
         }
         
         .positive {
             color: #2E7D32;
+            font-weight: 600;
         }
         
         .negative {
             color: #C62828;
+            font-weight: 600;
         }
         
         .total-row {
-            background: #E3F2FD !important;
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%) !important;
             font-weight: bold;
+            border-top: 3px solid #1a237e;
+        }
+        
+        .total-row td {
+            color: #1a237e;
+            font-size: 1.05em;
         }
         
         .best-worst {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
         
         .best-worst-card {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+            border: 2px solid rgba(0,0,0,0.03);
+            transition: all 0.3s;
+        }
+        
+        .best-worst-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.12);
         }
         
         .best-worst-card h3 {
-            font-size: 1em;
-            margin-bottom: 15px;
+            font-size: 1.1em;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 700;
+        }
+        
+        .best-worst-card.best {
+            border-left: 5px solid #2E7D32;
+        }
+        
+        .best-worst-card.worst {
+            border-left: 5px solid #C62828;
         }
         
         .best-worst-card.best h3 {
@@ -403,13 +442,14 @@
         }
         
         .best-worst-card .ticker-name {
-            font-size: 1.3em;
+            font-size: 1.4em;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #1a237e;
         }
         
         .best-worst-card .gain-value {
-            font-size: 1.5em;
+            font-size: 1.6em;
             font-weight: bold;
         }
         
@@ -424,9 +464,10 @@
             background: #FFEBEE;
             color: #C62828;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             text-align: center;
             margin: 20px 0;
+            border: 2px solid #EF5350;
         }
         
         @media (max-width: 768px) {
@@ -435,15 +476,15 @@
             }
             
             .card-value {
-                font-size: 1.5em;
+                font-size: 1.2em;
             }
             
             .chart-wrapper {
-                height: 250px;
+                height: 300px;
             }
             
             th, td {
-                padding: 8px;
+                padding: 10px 8px;
                 font-size: 0.85em;
             }
             
@@ -467,14 +508,12 @@
             <div class="last-update" id="lastUpdate"></div>
         </header>
         
-        <!-- Onglet COURS -->
         <div id="cours" class="tab-content active">
             <div id="cours-content">
                 <div class="loading">Chargement des cours...</div>
             </div>
         </div>
         
-        <!-- Onglet PORTFOLIO -->
         <div id="portfolio" class="tab-content">
             <div id="portfolio-content">
                 <div class="loading">Chargement du portfolio...</div>
@@ -550,7 +589,6 @@
                 'Dernière mise à jour : ' + new Date().toLocaleString('fr-FR');
         }
 
-        // ==== COURS ====
         async function loadCours() {
             const content = document.getElementById('cours-content');
             content.innerHTML = '<div class="loading">Chargement des cours...</div>';
@@ -605,7 +643,7 @@
             dateStr = formatDateJJMMAAAA(dateStr);
             
             let html = `
-                <div style="text-align: center; margin-bottom: 12px;">
+                <div style="text-align: center; margin-bottom: 20px;">
                     <span class="global-date">📅 ${dateStr}</span>
                 </div>
                 <div class="cards-grid">
@@ -656,8 +694,8 @@
 
             html += `
                 <div class="chart-container">
-                    <div class="chart-title">🥧 Répartition du Portfolio (par valorisation)</div>
-                    <div class="chart-wrapper" style="height: 350px;">
+                    <div class="chart-title">🥧 Répartition du Portfolio</div>
+                    <div class="chart-wrapper">
                         <canvas id="chartRepartitionCours"></canvas>
                     </div>
                 </div>
@@ -678,7 +716,6 @@
             }
         }
 
-        // ==== PORTFOLIO ====
         async function loadPortfolio() {
             const content = document.getElementById('portfolio-content');
             content.innerHTML = '<div class="loading">Chargement du portfolio...</div>';
@@ -693,7 +730,6 @@
                 content.innerHTML = `
                     <div class="error">
                         ❌ Erreur de chargement du portfolio<br>
-                        Vérifiez que la feuille "BD" existe et est publique.<br>
                         <small>${error.message}</small>
                     </div>
                 `;
@@ -720,7 +756,7 @@
             const content = document.getElementById('portfolio-content');
             
             if (data.length === 0) {
-                content.innerHTML = '<div class="error">Aucune donnée trouvée dans la feuille "BD"</div>';
+                content.innerHTML = '<div class="error">Aucune donnée trouvée</div>';
                 return;
             }
 
@@ -783,13 +819,6 @@
                             ${totalGain >= 0 ? '+' : ''}${totalGain.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD
                             <br><small>(${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)</small>
                         </div>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-title">🥧 Répartition du Portfolio (par valorisation)</div>
-                    <div class="chart-wrapper" style="height: 350px;">
-                        <canvas id="chartRepartition"></canvas>
                     </div>
                 </div>
 
@@ -876,34 +905,33 @@
                 </div>
             `;
 
-            html += `
-                <div class="table-container" style="margin-top:20px;">
-                    <div class="chart-title">📋 Détail du Portfolio - OPCVM</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Titre</th>
-                                <th>Nb</th>
-                                <th>Cours</th>
-                                <th>Investi</th>
-                                <th>Valorisation</th>
-                                <th>Gains</th>
-                                <th>%</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            addRows(opcvm);
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            if (opcvm.length > 0) {
+                html += `
+                    <div class="table-container">
+                        <div class="chart-title">📋 Détail du Portfolio - OPCVM</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Nb</th>
+                                    <th>Cours</th>
+                                    <th>Investi</th>
+                                    <th>Valorisation</th>
+                                    <th>Gains</th>
+                                    <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                addRows(opcvm);
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
 
             content.innerHTML = html;
-            createRepartitionChart(data, 'chartRepartition');
             createRepartitionChart(data, 'chartRepartitionCours');
         }
         
@@ -924,10 +952,7 @@
                 '#F57C00',
                 '#6A1B9A',
                 '#00796B',
-                '#E64A19',
-                '#5D4037',
-                '#455A64',
-                '#AD1457'
+                '#E64A19'
             ];
             
             let totalValorisation = 0;
@@ -952,13 +977,13 @@
                 new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: labels.map((label, i) => `${label} (${percentages[i]}%)`),
+                        labels: labels,
                         datasets: [{
                             data: values,
                             backgroundColor: backgroundColors.slice(0, labels.length),
                             borderColor: '#fff',
-                            borderWidth: 2,
-                            hoverOffset: 10
+                            borderWidth: 3,
+                            hoverOffset: 15
                         }]
                     },
                     options: {
@@ -968,12 +993,12 @@
                             legend: {
                                 position: 'right',
                                 labels: {
-                                    font: { size: 11 },
-                                    padding: 15,
+                                    font: { size: 12, weight: '600' },
+                                    padding: 18,
                                     generateLabels: function(chart) {
                                         const data = chart.data;
                                         return data.labels.map((label, i) => ({
-                                            text: label,
+                                            text: `${label} (${percentages[i]}%)`,
                                             fillStyle: data.datasets[0].backgroundColor[i],
                                             hidden: false,
                                             index: i
@@ -982,16 +1007,54 @@
                                 }
                             },
                             tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                padding: 12,
+                                titleFont: { size: 14, weight: 'bold' },
+                                bodyFont: { size: 13 },
                                 callbacks: {
                                     label: function(context) {
                                         const value = context.parsed;
                                         const percentage = ((value / totalValorisation) * 100).toFixed(1);
-                                        return `${context.label.split('(')[0]}: ${value.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD (${percentage}%)`;
+                                        return `${value.toLocaleString('fr-FR', {minimumFractionDigits: 2})} MAD (${percentage}%)`;
                                     }
+                                }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                },
+                                formatter: (value, ctx) => {
+                                    const percentage = ((value / totalValorisation) * 100).toFixed(1);
+                                    return percentage + '%';
                                 }
                             }
                         }
-                    }
+                    },
+                    plugins: [{
+                        id: 'datalabels',
+                        afterDatasetsDraw(chart) {
+                            const ctx = chart.ctx;
+                            chart.data.datasets.forEach((dataset, i) => {
+                                const meta = chart.getDatasetMeta(i);
+                                meta.data.forEach((element, index) => {
+                                    const data = dataset.data[index];
+                                    const percentage = ((data / totalValorisation) * 100).toFixed(1);
+                                    
+                                    if (percentage > 3) {
+                                        const {x, y} = element.tooltipPosition();
+                                        
+                                        ctx.fillStyle = '#fff';
+                                        ctx.font = 'bold 14px Arial';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(percentage + '%', x, y);
+                                    }
+                                });
+                            });
+                        }
+                    }]
                 });
             }
         }
